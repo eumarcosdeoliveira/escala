@@ -67,7 +67,8 @@ export function Header({
       const result = await response.json();
 
       if (response.ok) {
-        alert(`Dados restaurados com sucesso!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros de acompanhamento`);
+        const photosMsg = result.stats.photosRestored > 0 ? `\n${result.stats.photosRestored} fotos restauradas` : "";
+        alert(`Dados restaurados com sucesso!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros de acompanhamento${photosMsg}`);
         onDataRestore?.();
       } else {
         alert(`Erro: ${result.error}`);

@@ -134,7 +134,8 @@ export default function Home() {
       const result = await response.json();
 
       if (response.ok) {
-        alert(`Dados restaurados!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros`);
+        const photosMsg = result.stats.photosRestored > 0 ? `\n${result.stats.photosRestored} fotos` : "";
+        alert(`Dados restaurados!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros${photosMsg}`);
         setMenuOpen(false);
         window.location.reload();
       } else {
