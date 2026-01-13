@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { addWeeks, subWeeks, format, addDays, startOfWeek, isToday, isFuture } from "date-fns";
+import { Download, Upload, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 // Desktop components
@@ -56,35 +58,98 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedAcompanhante, setSelectedAcompanhante] = useState<Acompanhante | null>(null);
   const [showAcompanhanteDetalhes, setShowAcompanhanteDetalhes] = useState(false);
+  const [mobileUploading, setMobileUploading] = useState(false);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [acompRes, turnosRes, registrosRes] = await Promise.all([
-          fetch("/api/acompanhantes"),
-          fetch("/api/turnos"),
-          fetch("/api/acompanhamento"),
-        ]);
+  // Fetch data function
+  const fetchData = async () => {
+    try {
+      const [acompRes, turnosRes, registrosRes] = await Promise.all([
+        fetch("/api/acompanhantes"),
+        fetch("/api/turnos"),
+        fetch("/api/acompanhamento"),
+      ]);
 
-        if (acompRes.ok) {
-          setAcompanhantes(await acompRes.json());
-        }
-        if (turnosRes.ok) {
-          setTurnos(await turnosRes.json());
-        }
-        if (registrosRes.ok) {
-          setRegistrosAcompanhamento(await registrosRes.json());
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      } finally {
-        setLoading(false);
+      if (acompRes.ok) {
+        setAcompanhantes(await acompRes.json());
       }
-    };
+      if (turnosRes.ok) {
+        setTurnos(await turnosRes.json());
+      }
+      if (registrosRes.ok) {
+        setRegistrosAcompanhamento(await registrosRes.json());
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial fetch
+  useEffect(() => {
     fetchData();
   }, []);
+
+  // Refresh data after restore
+  const handleDataRestore = () => {
+    window.location.reload();
+  };
+
+  // Mobile backup functions
+  const handleMobileDownload = async () => {
+    try {
+      const response = await fetch("/api/backup");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `escala-backup-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setMenuOpen(false);
+    } catch (error) {
+      console.error("Erro ao baixar backup:", error);
+      alert("Erro ao baixar backup");
+    }
+  };
+
+  const handleMobileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMobileUploading(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const response = await fetch("/api/backup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(`Dados restaurados!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros`);
+        setMenuOpen(false);
+        window.location.reload();
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("Erro ao restaurar:", error);
+      alert("Erro ao restaurar. Verifique se o arquivo e valido.");
+    } finally {
+      setMobileUploading(false);
+      if (mobileFileInputRef.current) {
+        mobileFileInputRef.current.value = "";
+      }
+    }
+  };
 
   // Calculate coverage gaps - para hoje e dias futuros
   const gaps = useMemo(() => {
@@ -377,6 +442,40 @@ export default function Home() {
               >
                 <span className="text-indigo-600">Acompanhamento do Paciente</span>
               </button>
+
+              {/* Backup section */}
+              <div className="border-t border-gray-200 my-4" />
+              <p className="px-4 text-xs text-gray-500 uppercase tracking-wider mb-2">
+                Backup de Dados
+              </p>
+              <input
+                ref={mobileFileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleMobileUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={handleMobileDownload}
+                className="w-full justify-start px-4 py-3 h-auto font-normal"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Baixar Backup
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => mobileFileInputRef.current?.click()}
+                disabled={mobileUploading}
+                className="w-full justify-start px-4 py-3 h-auto font-normal mt-2"
+              >
+                {mobileUploading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
+                Restaurar Backup
+              </Button>
             </nav>
           </SheetContent>
         </Sheet>
@@ -466,6 +565,7 @@ export default function Home() {
         activeTab={desktopTab}
         onTabChange={setDesktopTab}
         gapsCount={totalGaps}
+        onDataRestore={handleDataRestore}
       />
 
       <div className="flex flex-1 overflow-hidden">

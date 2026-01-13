@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Calendar, Clock, Users, BarChart3, Activity } from "lucide-react";
+import { useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Users, BarChart3, Activity, Download, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +15,7 @@ interface HeaderProps {
   activeTab: DesktopTabType;
   onTabChange: (tab: DesktopTabType) => void;
   gapsCount?: number;
+  onDataRestore?: () => void;
 }
 
 export function Header({
@@ -23,8 +25,63 @@ export function Header({
   activeTab,
   onTabChange,
   gapsCount = 0,
+  onDataRestore,
 }: HeaderProps) {
   const mesAno = format(currentDate, "MMMM yyyy", { locale: ptBR });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch("/api/backup");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `escala-backup-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erro ao baixar backup:", error);
+      alert("Erro ao baixar backup");
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      const response = await fetch("/api/backup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(`Dados restaurados com sucesso!\n\n${result.stats.acompanhantes} acompanhantes\n${result.stats.turnos} turnos\n${result.stats.registrosAcompanhamento} registros de acompanhamento`);
+        onDataRestore?.();
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("Erro ao restaurar backup:", error);
+      alert("Erro ao restaurar backup. Verifique se o arquivo JSON e valido.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const tabs = [
     { id: "escala" as DesktopTabType, label: "Escala", icon: Calendar },
@@ -70,11 +127,38 @@ export function Header({
           </Button>
         </div>
 
-        {/* User icons - decorative */}
+        {/* Backup buttons */}
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-gray-200" />
-          <div className="w-10 h-10 rounded-full bg-primary" />
-          <div className="w-10 h-10 rounded-full bg-primary-600" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleUpload}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Backup
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-2"
+          >
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
+            Restaurar
+          </Button>
         </div>
       </div>
 
