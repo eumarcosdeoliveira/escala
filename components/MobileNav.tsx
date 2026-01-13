@@ -2,7 +2,7 @@
 
 import { Calendar, Clock, Users, BarChart3 } from "lucide-react";
 
-type TabType = "escala" | "cobertura" | "pessoas" | "relatorio";
+type TabType = "escala" | "cobertura" | "pessoas" | "relatorio" | "acompanhamento";
 
 interface MobileNavProps {
   activeTab: TabType;

@@ -80,6 +80,7 @@ export function Sidebar({
         horaInicio: novoTurno.horaInicio,
         horaFim: novoTurno.horaFim,
         observacao: novoTurno.observacao,
+        pontosAtencao: "",
       });
       setNovoTurno({
         acompanhanteId: "",
