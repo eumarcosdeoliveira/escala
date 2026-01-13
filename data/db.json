@@ -1,0 +1,121 @@
+{
+  "acompanhantes": [
+    {
+      "id": 1,
+      "nome": "Sandra",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#3B82F6"
+    },
+    {
+      "id": 2,
+      "nome": "Marcos",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#EF4444"
+    },
+    {
+      "id": 3,
+      "nome": "Shirley",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#3B82F6"
+    },
+    {
+      "id": 4,
+      "nome": "Seldja",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#6366F1"
+    },
+    {
+      "id": 5,
+      "nome": "Weruska",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#3B82F6"
+    },
+    {
+      "id": 6,
+      "nome": "Raiza",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#8B5CF6"
+    },
+    {
+      "id": 7,
+      "nome": "Tiago",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#6366F1"
+    },
+    {
+      "id": 8,
+      "nome": "Rafael",
+      "telefone": "",
+      "avatar": null,
+      "cor": "#6366F1"
+    }
+  ],
+  "turnos": [
+    {
+      "acompanhanteId": 2,
+      "data": "2026-01-13",
+      "periodo": "noite",
+      "horaInicio": "18:00",
+      "horaFim": "00:00",
+      "observacao": "",
+      "pontosAtencao": "",
+      "id": 1
+    },
+    {
+      "acompanhanteId": 2,
+      "data": "2026-01-13",
+      "periodo": "madrugada",
+      "horaInicio": "00:00",
+      "horaFim": "08:00",
+      "observacao": "",
+      "pontosAtencao": "",
+      "id": 2
+    },
+    {
+      "acompanhanteId": 1,
+      "data": "2026-01-14",
+      "periodo": "manha",
+      "horaInicio": "07:00",
+      "horaFim": "12:00",
+      "observacao": "",
+      "pontosAtencao": "",
+      "id": 3
+    }
+  ],
+  "registrosAcompanhamento": [],
+  "configuracoes": {
+    "periodos": [
+      {
+        "id": "manha",
+        "nome": "Manha",
+        "horaInicio": "07:00",
+        "horaFim": "12:00"
+      },
+      {
+        "id": "tarde",
+        "nome": "Tarde",
+        "horaInicio": "13:00",
+        "horaFim": "18:00"
+      },
+      {
+        "id": "noite",
+        "nome": "Noite",
+        "horaInicio": "18:00",
+        "horaFim": "00:00"
+      },
+      {
+        "id": "madrugada",
+        "nome": "Madrugada",
+        "horaInicio": "00:00",
+        "horaFim": "07:00"
+      }
+    ]
+  }
+}
