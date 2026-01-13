@@ -31,6 +31,10 @@ export interface Turno {
   horaFim: string;
   observacao: string;
   pontosAtencao: string;
+  checkinHora?: string;      // Hora real de entrada (formato HH:mm)
+  checkoutHora?: string;     // Hora real de saida (formato HH:mm)
+  checkinAt?: string;        // Timestamp do checkin
+  checkoutAt?: string;       // Timestamp do checkout
 }
 
 export interface Periodo {

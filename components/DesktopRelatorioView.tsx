@@ -17,12 +17,16 @@ export function DesktopRelatorioView({
   registros = [],
   onSelectAcompanhante,
 }: DesktopRelatorioViewProps) {
+  // Calcula horas apenas de turnos com checkout realizado
   const getTotalHoras = (acompanhanteId: number) => {
     return turnos
-      .filter((t) => t.acompanhanteId === acompanhanteId)
+      .filter((t) => t.acompanhanteId === acompanhanteId && t.checkoutHora)
       .reduce((total, t) => {
-        const [h1, m1] = t.horaInicio.split(":").map(Number);
-        const [h2, m2] = t.horaFim.split(":").map(Number);
+        // Usa as horas reais de checkin/checkout se disponiveis
+        const horaInicio = t.checkinHora || t.horaInicio;
+        const horaFim = t.checkoutHora || t.horaFim;
+        const [h1, m1] = horaInicio.split(":").map(Number);
+        const [h2, m2] = horaFim.split(":").map(Number);
         let horas = (h2 * 60 + m2 - (h1 * 60 + m1)) / 60;
         if (horas < 0) horas += 24;
         return total + horas;
@@ -30,6 +34,11 @@ export function DesktopRelatorioView({
   };
 
   const getTotalTurnos = (acompanhanteId: number) => {
+    // Conta apenas turnos concluidos (com checkout)
+    return turnos.filter((t) => t.acompanhanteId === acompanhanteId && t.checkoutHora).length;
+  };
+
+  const getTotalTurnosAgendados = (acompanhanteId: number) => {
     return turnos.filter((t) => t.acompanhanteId === acompanhanteId).length;
   };
 
@@ -185,7 +194,7 @@ export function DesktopRelatorioView({
                             {acompanhante.nome}
                           </h4>
                           <p className="text-xs text-gray-500">
-                            {totalTurnos} turno(s)
+                            {totalTurnos} concluido(s) / {getTotalTurnosAgendados(acompanhante.id)} agendado(s)
                           </p>
                         </div>
 

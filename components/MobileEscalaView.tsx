@@ -33,6 +33,9 @@ interface MobileEscalaViewProps {
   gaps: Map<string, Gap[]>;
   onAddTurno: (turno: Omit<Turno, "id">) => void;
   onDeleteTurno: (id: number) => void;
+  onCheckin: (id: number, hora: string) => void;
+  onCheckout: (id: number, hora: string) => void;
+  onTrocar: (id: number, novoAcompanhanteId: number) => void;
 }
 
 const PERIODOS = [
@@ -51,6 +54,9 @@ export function MobileEscalaView({
   gaps,
   onAddTurno,
   onDeleteTurno,
+  onCheckin,
+  onCheckout,
+  onTrocar,
 }: MobileEscalaViewProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [novoTurno, setNovoTurno] = useState({
@@ -177,7 +183,11 @@ export function MobileEscalaView({
                       key={turno.id}
                       turno={turno}
                       acompanhante={acompanhante}
+                      acompanhantes={acompanhantes}
                       onDelete={onDeleteTurno}
+                      onCheckin={onCheckin}
+                      onCheckout={onCheckout}
+                      onTrocar={onTrocar}
                     />
                   );
                 })

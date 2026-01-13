@@ -270,6 +270,65 @@ export default function Home() {
     }
   };
 
+  const handleCheckin = async (id: number, hora: string) => {
+    try {
+      const response = await fetch(`/api/turnos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          checkinHora: hora,
+          checkinAt: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setTurnos(turnos.map((t) => (t.id === id ? updated : t)));
+      }
+    } catch (error) {
+      console.error("Erro ao fazer checkin:", error);
+    }
+  };
+
+  const handleCheckout = async (id: number, hora: string) => {
+    try {
+      const response = await fetch(`/api/turnos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          checkoutHora: hora,
+          checkoutAt: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setTurnos(turnos.map((t) => (t.id === id ? updated : t)));
+      }
+    } catch (error) {
+      console.error("Erro ao fazer checkout:", error);
+    }
+  };
+
+  const handleTrocar = async (id: number, novoAcompanhanteId: number) => {
+    try {
+      const response = await fetch(`/api/turnos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          acompanhanteId: novoAcompanhanteId,
+        }),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setTurnos(turnos.map((t) => (t.id === id ? updated : t)));
+      }
+    } catch (error) {
+      console.error("Erro ao trocar acompanhante:", error);
+    }
+  };
+
   const handleAddAcompanhante = async (nome: string, telefone?: string) => {
     try {
       const response = await fetch("/api/acompanhantes", {
@@ -372,7 +431,6 @@ export default function Home() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Carregando...</p>
         </div>
       </div>
     );
@@ -493,6 +551,9 @@ export default function Home() {
               gaps={gaps}
               onAddTurno={handleAddTurno}
               onDeleteTurno={handleDeleteTurno}
+              onCheckin={handleCheckin}
+              onCheckout={handleCheckout}
+              onTrocar={handleTrocar}
             />
           )}
 
@@ -578,6 +639,9 @@ export default function Home() {
             acompanhantes={acompanhantes}
             turnos={turnos}
             onAddTurno={handleAddTurno}
+            onCheckin={handleCheckin}
+            onCheckout={handleCheckout}
+            onTrocar={handleTrocar}
           />
         )}
 

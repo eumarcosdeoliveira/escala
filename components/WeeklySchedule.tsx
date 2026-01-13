@@ -3,6 +3,7 @@
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AlertTriangle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Acompanhante, Turno, Gap } from "@/lib/types";
 
 interface WeeklyScheduleProps {
@@ -133,14 +134,25 @@ export function WeeklySchedule({
                           return (
                             <div
                               key={turno.id}
-                              className="px-2 py-1 rounded text-xs font-medium text-center transition-transform hover:scale-105"
+                              className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-transform hover:scale-105"
                               style={{
                                 backgroundColor: `${acompanhante.cor}20`,
                                 color: acompanhante.cor,
                                 borderLeft: `3px solid ${acompanhante.cor}`,
                               }}
                             >
-                              {acompanhante.nome}
+                              <Avatar className="h-5 w-5 flex-shrink-0">
+                                {acompanhante.avatar && (
+                                  <AvatarImage src={acompanhante.avatar} />
+                                )}
+                                <AvatarFallback
+                                  style={{ backgroundColor: acompanhante.cor }}
+                                  className="text-white text-[10px]"
+                                >
+                                  {acompanhante.nome.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate">{acompanhante.nome}</span>
                             </div>
                           );
                         })}

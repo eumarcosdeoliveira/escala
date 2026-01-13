@@ -6,11 +6,11 @@ import {
   ChevronRight,
   Plus,
   Check,
-  Megaphone,
   ArrowLeftRight,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,9 @@ interface SidebarProps {
   acompanhantes: Acompanhante[];
   turnos: Turno[];
   onAddTurno: (turno: Omit<Turno, "id">) => void;
+  onCheckin?: (id: number, hora: string) => void;
+  onCheckout?: (id: number, hora: string) => void;
+  onTrocar?: (id: number, novoAcompanhanteId: number) => void;
 }
 
 export function Sidebar({
@@ -46,8 +49,14 @@ export function Sidebar({
   acompanhantes,
   turnos,
   onAddTurno,
+  onCheckin,
+  onCheckout,
+  onTrocar,
 }: SidebarProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTrocarDialogOpen, setIsTrocarDialogOpen] = useState(false);
+  const [turnoParaTrocar, setTurnoParaTrocar] = useState<Turno | null>(null);
+  const [selectedAcompanhante, setSelectedAcompanhante] = useState("");
   const [novoTurno, setNovoTurno] = useState({
     acompanhanteId: "",
     periodo: "",
@@ -65,6 +74,38 @@ export function Sidebar({
 
   const getAcompanhante = (id: number) =>
     acompanhantes.find((a) => a.id === id);
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+  };
+
+  const handleCheckin = (turno: Turno) => {
+    if (onCheckin) {
+      onCheckin(turno.id, getCurrentTime());
+    }
+  };
+
+  const handleCheckout = (turno: Turno) => {
+    if (onCheckout) {
+      onCheckout(turno.id, getCurrentTime());
+    }
+  };
+
+  const handleOpenTrocar = (turno: Turno) => {
+    setTurnoParaTrocar(turno);
+    setSelectedAcompanhante("");
+    setIsTrocarDialogOpen(true);
+  };
+
+  const handleConfirmTrocar = () => {
+    if (onTrocar && turnoParaTrocar && selectedAcompanhante) {
+      onTrocar(turnoParaTrocar.id, parseInt(selectedAcompanhante));
+      setIsTrocarDialogOpen(false);
+      setTurnoParaTrocar(null);
+      setSelectedAcompanhante("");
+    }
+  };
 
   const handleAddTurno = () => {
     if (
@@ -177,6 +218,9 @@ export function Sidebar({
               const acompanhante = getAcompanhante(turno.acompanhanteId);
               if (!acompanhante) return null;
 
+              const hasCheckin = !!turno.checkinHora;
+              const hasCheckout = !!turno.checkoutHora;
+
               return (
                 <div
                   key={turno.id}
@@ -189,6 +233,9 @@ export function Sidebar({
                   <div className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-10 w-10">
+                        {acompanhante.avatar && (
+                          <AvatarImage src={acompanhante.avatar} />
+                        )}
                         <AvatarFallback
                           style={{ backgroundColor: acompanhante.cor }}
                           className="text-white text-sm"
@@ -211,17 +258,52 @@ export function Sidebar({
                       </div>
                     </div>
 
+                    {/* Status de checkin/checkout */}
+                    {(hasCheckin || hasCheckout) && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {hasCheckin && (
+                          <span className="flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                            <Check className="h-2.5 w-2.5" />
+                            Entrada: {turno.checkinHora}
+                          </span>
+                        )}
+                        {hasCheckout && (
+                          <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                            <LogOut className="h-2.5 w-2.5" />
+                            Saida: {turno.checkoutHora}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {/* Action buttons */}
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                      <button className="flex items-center gap-1 text-xs text-primary font-medium hover:text-primary-700">
-                        <Check className="h-3 w-3" />
-                        Check-in
-                      </button>
-                      <button className="flex items-center gap-1 text-xs text-gray-500 font-medium hover:text-gray-700 ml-auto">
-                        <Megaphone className="h-3 w-3" />
-                        Anunciar
-                      </button>
-                      <button className="flex items-center gap-1 text-xs text-gray-500 font-medium hover:text-gray-700">
+                      {!hasCheckin ? (
+                        <button
+                          onClick={() => handleCheckin(turno)}
+                          className="flex items-center gap-1 text-xs text-primary font-medium hover:text-primary-700"
+                        >
+                          <Check className="h-3 w-3" />
+                          Check-in
+                        </button>
+                      ) : !hasCheckout ? (
+                        <button
+                          onClick={() => handleCheckout(turno)}
+                          className="flex items-center gap-1 text-xs text-blue-600 font-medium hover:text-blue-700"
+                        >
+                          <LogOut className="h-3 w-3" />
+                          Check-out
+                        </button>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                          <Check className="h-3 w-3" />
+                          Concluido
+                        </span>
+                      )}
+                      <button
+                        onClick={() => handleOpenTrocar(turno)}
+                        className="flex items-center gap-1 text-xs text-gray-500 font-medium hover:text-gray-700 ml-auto"
+                      >
                         <ArrowLeftRight className="h-3 w-3" />
                         Trocar
                       </button>
@@ -346,6 +428,61 @@ export function Sidebar({
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Dialog para trocar acompanhante */}
+      <Dialog open={isTrocarDialogOpen} onOpenChange={setIsTrocarDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Trocar Acompanhante</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            {turnoParaTrocar && (
+              <p className="text-sm text-gray-500">
+                Selecione quem vai substituir{" "}
+                <strong>
+                  {getAcompanhante(turnoParaTrocar.acompanhanteId)?.nome}
+                </strong>{" "}
+                neste turno.
+              </p>
+            )}
+            <Select
+              value={selectedAcompanhante}
+              onValueChange={setSelectedAcompanhante}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o acompanhante..." />
+              </SelectTrigger>
+              <SelectContent>
+                {acompanhantes
+                  .filter((a) => a.id !== turnoParaTrocar?.acompanhanteId)
+                  .map((a) => (
+                    <SelectItem key={a.id} value={a.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          {a.avatar && <AvatarImage src={a.avatar} />}
+                          <AvatarFallback
+                            style={{ backgroundColor: a.cor }}
+                            className="text-white text-xs"
+                          >
+                            {a.nome.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {a.nome}
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleConfirmTrocar}
+              className="w-full"
+              disabled={!selectedAcompanhante}
+            >
+              Confirmar Troca
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Bottom decoration */}
       <div className="flex justify-center gap-4 py-4">
