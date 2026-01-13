@@ -10,6 +10,10 @@ import { Sidebar } from "@/components/Sidebar";
 import { WeeklySchedule } from "@/components/WeeklySchedule";
 import { CoverageGaps } from "@/components/CoverageGaps";
 import { AcompanhantesManager } from "@/components/AcompanhantesManager";
+import { DesktopAcompanhamentoView } from "@/components/DesktopAcompanhamentoView";
+import { DesktopPessoasView } from "@/components/DesktopPessoasView";
+import { DesktopRelatorioView } from "@/components/DesktopRelatorioView";
+import { DesktopAcompanhanteDetalhes } from "@/components/DesktopAcompanhanteDetalhes";
 
 // Mobile components
 import { MobileHeader } from "@/components/MobileHeader";
@@ -37,12 +41,13 @@ const PERIODOS = [
 ];
 
 type MobileTabType = "escala" | "cobertura" | "pessoas" | "relatorio" | "acompanhamento";
+type DesktopTabType = "escala" | "cobertura" | "pessoas" | "relatorio" | "acompanhamento";
 
 export default function Home() {
   const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState<"escalas" | "publicar">("escalas");
+  const [desktopTab, setDesktopTab] = useState<DesktopTabType>("escala");
   const [mobileTab, setMobileTab] = useState<MobileTabType>("escala");
   const [acompanhantes, setAcompanhantes] = useState<Acompanhante[]>([]);
   const [turnos, setTurnos] = useState<Turno[]>([]);
@@ -236,7 +241,7 @@ export default function Home() {
     if (isMobile) {
       setMobileTab("escala");
     } else {
-      setActiveTab("escalas");
+      setDesktopTab("escala");
     }
   };
 
@@ -458,22 +463,25 @@ export default function Home() {
         currentDate={currentDate}
         onPreviousWeek={handlePreviousWeek}
         onNextWeek={handleNextWeek}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        activeTab={desktopTab}
+        onTabChange={setDesktopTab}
+        gapsCount={totalGaps}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          currentDate={currentDate}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          acompanhantes={acompanhantes}
-          turnos={turnos}
-          onAddTurno={handleAddTurno}
-        />
+        {desktopTab === "escala" && (
+          <Sidebar
+            currentDate={currentDate}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            acompanhantes={acompanhantes}
+            turnos={turnos}
+            onAddTurno={handleAddTurno}
+          />
+        )}
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          {activeTab === "escalas" ? (
+          {desktopTab === "escala" && (
             <>
               {/* Toolbar */}
               <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
@@ -497,7 +505,9 @@ export default function Home() {
                 gaps={gaps}
               />
             </>
-          ) : (
+          )}
+
+          {desktopTab === "cobertura" && (
             <div className="flex-1 overflow-auto p-6">
               <div className="max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -535,8 +545,49 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {desktopTab === "pessoas" && (
+            <DesktopPessoasView
+              acompanhantes={acompanhantes}
+              turnos={turnos}
+              onAdd={handleAddAcompanhante}
+              onRemove={handleRemoveAcompanhante}
+              onSelect={handleSelectAcompanhante}
+            />
+          )}
+
+          {desktopTab === "relatorio" && (
+            <DesktopRelatorioView
+              acompanhantes={acompanhantes}
+              turnos={turnos}
+              registros={registrosAcompanhamento}
+              onSelectAcompanhante={handleSelectAcompanhante}
+            />
+          )}
+
+          {desktopTab === "acompanhamento" && (
+            <DesktopAcompanhamentoView
+              registros={registrosAcompanhamento}
+              onAdd={handleAddRegistroAcompanhamento}
+              onDelete={handleDeleteRegistroAcompanhamento}
+            />
+          )}
         </main>
       </div>
+
+      {/* Modal de detalhes do acompanhante desktop */}
+      {showAcompanhanteDetalhes && selectedAcompanhante && (
+        <DesktopAcompanhanteDetalhes
+          acompanhante={selectedAcompanhante}
+          turnos={turnos.filter((t) => t.acompanhanteId === selectedAcompanhante.id)}
+          registros={registrosAcompanhamento}
+          onClose={() => {
+            setShowAcompanhanteDetalhes(false);
+            setSelectedAcompanhante(null);
+          }}
+          onUpdate={handleUpdateAcompanhante}
+        />
+      )}
     </div>
   );
 }
