@@ -17,29 +17,29 @@
     {
       "id": 3,
       "nome": "Shirley",
-      "telefone": "",
-      "avatar": null,
+      "telefone": "(81) 99991-4222",
+      "avatar": "/uploads/avatar_1768336336878.png",
       "cor": "#3B82F6"
     },
     {
       "id": 4,
       "nome": "Seldja",
-      "telefone": "",
-      "avatar": null,
+      "telefone": "(82) 98815-3839",
+      "avatar": "/uploads/avatar_1768336375848.png",
       "cor": "#6366F1"
     },
     {
       "id": 5,
       "nome": "Weruska",
-      "telefone": "",
-      "avatar": null,
+      "telefone": "(81) 99703-2409",
+      "avatar": "/uploads/avatar_1768336409028.png",
       "cor": "#3B82F6"
     },
     {
       "id": 6,
       "nome": "Raiza",
-      "telefone": "",
-      "avatar": null,
+      "telefone": "(81) 98597-8283",
+      "avatar": "/uploads/avatar_1768336448475.png",
       "cor": "#8B5CF6"
     },
     {
@@ -61,20 +61,6 @@
     {
       "acompanhanteId": 2,
       "data": "2026-01-13",
-      "periodo": "noite",
-      "horaInicio": "18:00",
-      "horaFim": "00:00",
-      "observacao": "",
-      "pontosAtencao": "",
-      "id": 1,
-      "checkinHora": "17:26",
-      "checkinAt": "2026-01-13T20:26:50.794Z",
-      "checkoutHora": "17:27",
-      "checkoutAt": "2026-01-13T20:27:00.657Z"
-    },
-    {
-      "acompanhanteId": 2,
-      "data": "2026-01-13",
       "periodo": "madrugada",
       "horaInicio": "00:00",
       "horaFim": "08:00",
@@ -91,6 +77,16 @@
       "observacao": "",
       "pontosAtencao": "",
       "id": 3
+    },
+    {
+      "acompanhanteId": 2,
+      "data": "2026-01-13",
+      "periodo": "noite",
+      "horaInicio": "18:00",
+      "horaFim": "00:00",
+      "observacao": "",
+      "pontosAtencao": "",
+      "id": 4
     }
   ],
   "registrosAcompanhamento": [],
